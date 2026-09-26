@@ -24,7 +24,6 @@ const defaultForm: InvoicePayload = {
 };
 
 export default function HomePage() {
-  const [ready, setReady] = useState(false);
   const [form, setForm] = useState<InvoicePayload>(defaultForm);
   const [latest, setLatest] = useState<DecisionResult | null>(null);
   const [history, setHistory] = useState<DecisionResult[]>([]);
@@ -42,7 +41,6 @@ export default function HomePage() {
   }, [history]);
 
   useEffect(() => {
-    setReady(true);
     listDecisions()
       .then(setHistory)
       .catch(() => undefined);
@@ -62,10 +60,6 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
-  }
-
-  if (!ready) {
-    return <div className="min-h-screen bg-slate-50" />;
   }
 
   return (
