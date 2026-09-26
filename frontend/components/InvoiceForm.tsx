@@ -30,7 +30,7 @@ export function InvoiceForm({ form, setForm, loading, error, onSubmit, submitLab
             className={inputClass}
             type="number"
             step="0.01"
-            value={form.invoice_amount}
+            value={form.invoice_amount || ""}
             onChange={(e) => update("invoice_amount", Number(e.target.value))}
             required
           />

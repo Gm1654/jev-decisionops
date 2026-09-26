@@ -15,18 +15,18 @@ import { MetricsRow } from "@/components/MetricsRow";
 import { RecentDecisions } from "@/components/RecentDecisions";
 
 const defaultForm: InvoicePayload = {
-  vendor_name: "Acme Office Supplies",
-  invoice_number: "INV-001",
-  invoice_amount: 850,
+  vendor_name: "",
+  invoice_number: "",
+  invoice_amount: 0,
   currency: "USD",
-  vendor_age_months: 24,
-  previous_invoices: 20,
+  vendor_age_months: 0,
+  previous_invoices: 0,
   late_deliveries: 0,
   previous_payment_issues: 0,
   duplicate_invoice: false,
-  purchase_order_exists: true,
+  purchase_order_exists: false,
   blocked_vendor: false,
-  department: "Operations",
+  department: "",
   country: "US",
 };
 
