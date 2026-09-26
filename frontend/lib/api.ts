@@ -35,6 +35,28 @@ export type DecisionResult = {
   };
 };
 
+function apiErrorMessage(body: unknown, fallback: string): string {
+  if (!body || typeof body !== "object" || !("detail" in body)) {
+    return fallback;
+  }
+  const detail = (body as { detail: unknown }).detail;
+  if (typeof detail === "string") {
+    return detail;
+  }
+  if (Array.isArray(detail)) {
+    const parts = detail.map((item) => {
+      if (typeof item === "string") return item;
+      if (item && typeof item === "object" && "msg" in item) {
+        return String((item as { msg: unknown }).msg);
+      }
+      return "";
+    });
+    const message = parts.filter(Boolean).join("; ");
+    return message || fallback;
+  }
+  return fallback;
+}
+
 export async function evaluateInvoice(payload: InvoicePayload): Promise<DecisionResult> {
   const response = await fetch(`${API_BASE}/api/decisions`, {
     method: "POST",
@@ -43,7 +65,7 @@ export async function evaluateInvoice(payload: InvoicePayload): Promise<Decision
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new Error(body.detail || "Decision request failed");
+    throw new Error(apiErrorMessage(body, "Decision request failed"));
   }
   return response.json();
 }

@@ -31,17 +31,6 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setReady(true);
-    listDecisions()
-      .then(setHistory)
-      .catch(() => undefined);
-  }, []);
-
-  if (!ready) {
-    return <div className="min-h-screen bg-slate-50" />;
-  }
-
   const metrics = useMemo(() => {
     const decisions = history.length;
     return {
@@ -52,8 +41,16 @@ export default function HomePage() {
     };
   }, [history]);
 
+  useEffect(() => {
+    setReady(true);
+    listDecisions()
+      .then(setHistory)
+      .catch(() => undefined);
+  }, []);
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError(null);
     try {
@@ -65,6 +62,10 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!ready) {
+    return <div className="min-h-screen bg-slate-50" />;
   }
 
   return (
