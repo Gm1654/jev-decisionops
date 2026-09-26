@@ -69,6 +69,7 @@ export default function HomePage() {
       setHistory((prev) => prev.filter((row) => row.id !== item.id));
       if (editingId === item.id) {
         setEditingId(null);
+        setForm(defaultForm);
       }
       if (latest?.id === item.id) {
         setLatest(null);
