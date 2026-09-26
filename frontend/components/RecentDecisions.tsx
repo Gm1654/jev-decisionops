@@ -1,7 +1,13 @@
-import { DecisionResult } from "@/lib/api";
+import { DecisionResult, formatJevModel } from "@/lib/api";
 import { DecisionBadge } from "@/components/DecisionBadge";
 
-export function RecentDecisions({ items }: { items: DecisionResult[] }) {
+type Props = {
+  items: DecisionResult[];
+  onEdit: (item: DecisionResult) => void;
+  onDelete: (item: DecisionResult) => void;
+};
+
+export function RecentDecisions({ items, onEdit, onDelete }: Props) {
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <h2 className="text-lg font-semibold text-navy-900">Recent Decisions</h2>
@@ -17,7 +23,8 @@ export function RecentDecisions({ items }: { items: DecisionResult[] }) {
                 <th className="pb-3 font-medium">Amount</th>
                 <th className="pb-3 font-medium">Decision</th>
                 <th className="pb-3 font-medium">Risk</th>
-                <th className="pb-3 font-medium">Model</th>
+                <th className="pb-3 font-medium">JEV Model</th>
+                <th className="pb-3 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -32,7 +39,17 @@ export function RecentDecisions({ items }: { items: DecisionResult[] }) {
                     <DecisionBadge decision={item.decision} />
                   </td>
                   <td className="py-3">{item.signals.risk_score?.toFixed(2) ?? "—"}</td>
-                  <td className="py-3">{item.signals.model ?? "—"}</td>
+                  <td className="py-3">{formatJevModel(item)}</td>
+                  <td className="py-3">
+                    <div className="flex gap-3">
+                      <button type="button" className="text-navy-800 hover:underline" onClick={() => onEdit(item)}>
+                        Edit
+                      </button>
+                      <button type="button" className="text-red-700 hover:underline" onClick={() => onDelete(item)}>
+                        Delete
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>

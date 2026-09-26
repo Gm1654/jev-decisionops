@@ -184,3 +184,37 @@ def test_list_decisions_includes_created(monkeypatch):
     listed = client.get("/api/decisions").json()
     assert len(listed) >= 1
     assert listed[0]["invoice"]["invoice_number"] == "INV-LIST"
+
+
+def test_update_and_delete_decision(monkeypatch):
+    from models import JevSignals
+    from main import app, _history
+
+    _history.clear()
+    monkeypatch.setattr(
+        "main.evaluate_invoice",
+        lambda invoice: (JevSignals(risk_score=1.0, confidence=0.99, review_probability=0.05, model="mock-policy"), False),
+    )
+    client = TestClient(app)
+    created = client.post("/api/decisions", json=sample_invoice(invoice_number="INV-EDIT").model_dump()).json()
+    decision_id = created["id"]
+
+    updated = client.put(
+        f"/api/decisions/{decision_id}",
+        json=sample_invoice(invoice_number="INV-EDIT-2", invoice_amount=900).model_dump(),
+    )
+    body = updated.json()
+    assert updated.status_code == 200
+    assert body["id"] == decision_id
+    assert body["invoice"]["invoice_number"] == "INV-EDIT-2"
+    assert len(client.get("/api/decisions").json()) == 1
+
+    missing = client.put("/api/decisions/missing", json=sample_invoice().model_dump())
+    assert missing.status_code == 404
+
+    deleted = client.delete(f"/api/decisions/{decision_id}")
+    assert deleted.status_code == 200
+    assert client.get("/api/decisions").json() == []
+
+    gone = client.delete(f"/api/decisions/{decision_id}")
+    assert gone.status_code == 404

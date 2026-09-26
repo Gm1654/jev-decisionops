@@ -77,3 +77,35 @@ export async function listDecisions(): Promise<DecisionResult[]> {
   }
   return response.json();
 }
+
+export async function updateInvoice(id: string, payload: InvoicePayload): Promise<DecisionResult> {
+  const response = await fetch(`${API_BASE}/api/decisions/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(apiErrorMessage(body, "Update request failed"));
+  }
+  return response.json();
+}
+
+export async function deleteDecision(id: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/decisions/${id}`, { method: "DELETE" });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(apiErrorMessage(body, "Delete request failed"));
+  }
+}
+
+export function formatJevModel(result: DecisionResult): string {
+  const model = result.signals.model;
+  if (!model) {
+    return "Not called";
+  }
+  if (!result.fallback_used && model.startsWith("jev-")) {
+    return `${model} (live)`;
+  }
+  return model;
+}

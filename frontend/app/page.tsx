@@ -1,7 +1,14 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { DecisionResult, InvoicePayload, evaluateInvoice, listDecisions } from "@/lib/api";
+import {
+  DecisionResult,
+  InvoicePayload,
+  deleteDecision,
+  evaluateInvoice,
+  listDecisions,
+  updateInvoice,
+} from "@/lib/api";
 import { InvoiceForm } from "@/components/InvoiceForm";
 import { DecisionResultCard } from "@/components/DecisionResultCard";
 import { MetricsRow } from "@/components/MetricsRow";
@@ -29,6 +36,7 @@ export default function HomePage() {
   const [history, setHistory] = useState<DecisionResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const metrics = useMemo(() => {
     const decisions = history.length;
@@ -46,15 +54,45 @@ export default function HomePage() {
       .catch(() => undefined);
   }, []);
 
+  function onEdit(item: DecisionResult) {
+    setForm({ ...item.invoice });
+    setEditingId(item.id);
+    setError(null);
+  }
+
+  async function onDelete(item: DecisionResult) {
+    if (!window.confirm(`Delete decision for ${item.invoice.invoice_number}?`)) {
+      return;
+    }
+    try {
+      await deleteDecision(item.id);
+      setHistory((prev) => prev.filter((row) => row.id !== item.id));
+      if (editingId === item.id) {
+        setEditingId(null);
+      }
+      if (latest?.id === item.id) {
+        setLatest(null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete failed");
+    }
+  }
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     if (loading) return;
     setLoading(true);
     setError(null);
     try {
-      const result = await evaluateInvoice(form);
+      const result = editingId ? await updateInvoice(editingId, form) : await evaluateInvoice(form);
       setLatest(result);
-      setHistory((prev) => [result, ...prev].slice(0, 20));
+      setHistory((prev) => {
+        if (editingId) {
+          return prev.map((row) => (row.id === editingId ? result : row));
+        }
+        return [result, ...prev].slice(0, 20);
+      });
+      setEditingId(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Request failed");
     } finally {
@@ -81,11 +119,12 @@ export default function HomePage() {
             loading={loading}
             error={error}
             onSubmit={onSubmit}
+            submitLabel={editingId ? "Update & Re-evaluate" : "Evaluate Invoice"}
           />
           <DecisionResultCard result={latest} />
         </div>
 
-        <RecentDecisions items={history} />
+        <RecentDecisions items={history} onEdit={onEdit} onDelete={onDelete} />
       </main>
     </div>
   );

@@ -7,9 +7,10 @@ type Props = {
   loading: boolean;
   error: string | null;
   onSubmit: (event: FormEvent) => void;
+  submitLabel: string;
 };
 
-export function InvoiceForm({ form, setForm, loading, error, onSubmit }: Props) {
+export function InvoiceForm({ form, setForm, loading, error, onSubmit, submitLabel }: Props) {
   function update<K extends keyof InvoicePayload>(key: K, value: InvoicePayload[K]) {
     setForm({ ...form, [key]: value });
   }
@@ -65,7 +66,7 @@ export function InvoiceForm({ form, setForm, loading, error, onSubmit }: Props) 
         disabled={loading}
         className="mt-6 w-full rounded-lg bg-navy-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-navy-700 disabled:opacity-60"
       >
-        {loading ? "Evaluating..." : "Evaluate Invoice"}
+        {loading ? "Evaluating..." : submitLabel}
       </button>
     </form>
   );

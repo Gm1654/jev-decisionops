@@ -1,4 +1,4 @@
-import { DecisionResult } from "@/lib/api";
+import { DecisionResult, formatJevModel } from "@/lib/api";
 import { DecisionBadge } from "@/components/DecisionBadge";
 
 export function DecisionResultCard({ result }: { result: DecisionResult | null }) {
@@ -19,7 +19,7 @@ export function DecisionResultCard({ result }: { result: DecisionResult | null }
           <Row label="Route" value={result.signals.route} />
           <Row label="Vendor Reliability" value={fmt(result.signals.vendor_reliability)} />
           <Row label="Priority" value={result.signals.priority} />
-          <Row label="Model" value={result.signals.model} />
+          <Row label="JEV Model" value={formatJevModel(result)} />
           <Row label="Fallback Used" value={result.fallback_used ? "true" : "false"} />
         </div>
       )}
